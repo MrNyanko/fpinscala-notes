@@ -241,6 +241,16 @@ object Chapter3 extends App {
       * -------------------------------------------------------
       * object Tree 中的map函数
       */
+
+    /** Exercise3.29
+      * 泛化size/maximum/depth和map,写一个新的函数fold,对它们的相似性抽象.
+      * 按照更加通用的函数标准来重新实现它们.你能对这个fold函数与List中的
+      * left和right fold做一下类比吗?
+      * 写一个map函数,类似于List中的同名函数,接收一个函数,对树中每个元素进行修改.
+      * -------------------------------------------------------
+      * object Tree 中的sizeViaFold/maximumViaFold/depthViaFold/mapViaFold函数
+      */
+
 }
 
 /** list 部分 */
@@ -490,4 +500,16 @@ object Tree {
         case Branch(l, r) => Branch(map(l)(f), map(l)(f))
     }
 
+    def fold[A, B](tree: Tree[A])(f: A => B)(g: (B, B) => B): B = tree match {
+        case Leaf(a) => f(a)
+        case Branch(l, r) => g(fold(l)(f)(g), fold(r)(f)(g))
+    }
+
+    def sizeViaFold[A](tree: Tree[A]): Int = fold(tree)(a => 1)(1 + _ + _)
+
+    def maximumViaFold(tree: Tree[Int]): Int = fold(tree)(a => a)(_ max _)
+
+    def depthViaFold[A](tree: Tree[A]): Int = fold(tree)(a => 0)((l, r) => 1 + (l max r))
+
+    def mapViaFold[A, B](tree: Tree[A])(f: A => B): Tree[B] = fold(tree)(a => Leaf(f(a)): Tree[B])(Branch(_, _))
 }
